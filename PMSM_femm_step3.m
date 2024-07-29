@@ -7,18 +7,18 @@ addpath("C:/femm42/mfiles/");
 L = 70; %적층높이
 D = 46; %직경
 D_2 = 42; %중심 ferrite의 직경
-num_pole = 8; %자석의 개수
+p = 8; %자석의 개수
 a_p = 0.89; %극호비
-w_m = D_2*pi/num_pole*a_p; %자석의 너비(호의 길이)
+w_m = D_2*pi/p*a_p; %자석의 너비(호의 길이)
 h_m = 1; %자석의 높이
 g =(D-D_2)/2-h_m; %공극 길이(stator 반지름 - 중심 ferrite 반지름)
-arc_m = 360/num_pole*1.5; %자석의 아크(deg)
+arc_m = 360/p*1.5; %자석의 아크(deg)
 num_slot = 12; %slot의 개수
 theta_slot = pi/10; %하나의 slot이 기계각에서 차지하는 각(rad)
 b_so = 0.5; %slot 오프닝 폭(mm)
 background = 100; %도화지의 가로, 세로 길이(중심은 원점)
 N = 200; %샘플링 개수
-B_txt = 1; %B_data.txt를 만들면 1, 만들지 않으면 0
+B_txt = 0; %B_data.txt를 만들면 1, 만들지 않으면 0
 
 %%%%%%%%%%%%%%%%%%%%카터계수%%%%%%%%%%%%%%%%%%%%%%
 Cater = 1; %1이면 카터계수가 고려된 모델을 그림, 아니면 실제의 형상을 그림
@@ -75,7 +75,6 @@ mi_clearselected()
 
 mi_zoomnatural() %전체화면으로 맞춤
 
-
 %%
 %<밑그림 그리기>
 
@@ -86,7 +85,7 @@ drawcircle(0, 0, D_s/2) %stator 그리기
 %%
 %<자석 한 개 그리기>
 
-theta_m = 2*pi/num_pole; %자석이 서로 떨어진 각
+theta_m = 2*pi/p; %자석이 서로 떨어진 각
 
 %자석의 점
 m_dot = zeros(2, 4);
@@ -152,7 +151,7 @@ transform_s = [cos(theta_s) -sin(theta_s);
 
 %자석
 m_dot_bin = m_dot;
-for i = 1:num_pole-1
+for i = 1:p-1
     m_dot_bin = transform_m*m_dot_bin;
     mi_addnode(m_dot_bin(1, 1), m_dot_bin(2, 1));
     mi_addnode(m_dot_bin(1, 2), m_dot_bin(2, 2));
@@ -190,7 +189,7 @@ name_m = 'N4X';
 angle_bin = w_m/(D_2/2)/2/pi*180; %극의 방향
 m_dot_bin = m_dot;
 
-for i = 1:num_pole
+for i = 1:p
     if rem(i, 2) == 1
         add_label(m_dot_bin(1, 4), m_dot_bin(2, 4), name_m, angle_bin, 1);
     else
@@ -232,12 +231,12 @@ add_label(D_s/2+5, 0, name_a, 0, 10);
 %컨투어 시작점과 끝점
 start_point = D_2*pi/8*(1-a_p)/2; %반 주기에서 자석이 없는 부위의 절반 길이
 start_point_theta = -start_point/(D_2/2); %각으로 환산
-end_point_theta = start_point_theta + 2*pi*(2/num_pole);
+end_point_theta = start_point_theta + 2*pi*(2/p);
 dot_start = (D/2+D_2/2+h_m)/2*[cos(start_point_theta); sin(start_point_theta)];
 dot_end = (D/2+D_2/2+h_m)/2*[cos(end_point_theta); sin(end_point_theta)];
 
 %샘플포인트
-theta_N = (0:N-1)/N*2*pi*(2/num_pole); %샘플링 포인트의 각
+theta_N = (0:N-1)/N*2*pi*(2/p); %샘플링 포인트의 각
 dot_sample = zeros(2, N);
 for i = 1:N
     dot_sample(1, i) = (D/2+D_2/2+h_m)/2*cos(start_point_theta+theta_N(i));
@@ -267,13 +266,16 @@ if B_txt == 1
     writematrix(B_xyn(3, :), 'B_data.txt'); %txt파일로 추출하기
 end
 
+%slot의 넓이 측정
+mo_selectblock(s_dot(1, 9), s_dot(2, 9));
+A_s = mo_blockintegral(5)*2*num_slot*1000*1000; %단위는 mm^2
+
 %%%%%%%%%%%%%%%컨투어로 femm에서 그래프 확인하기%%%%%%%%%%%%%%%%%%%%%
 %mo_addcontour(x_start, y_start);
 %mo_addcontour(x_end, y_end);
 %mo_bendcontour((2*pi*(2/num_pole))/pi*180, 10);
 %mo_makeplot(2, N, 'Bn.txt', 0);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 
 %%
 %함수

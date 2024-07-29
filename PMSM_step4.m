@@ -30,10 +30,12 @@ theta_d = 0; %distribution angle
 
 %%%%%%%%%%%%%%%%%%%%수정금지%%%%%%%%%%%%%%%%%%%%%%%
 N_fft = 201; %fft 샘플링 갯수(=전기각 해상도) (N_fft > 2*max_harmonics 의 조건을 만족해야함, 3의 배수여야 함)
+
 w_m = RPM/60*2*pi; %기계각속도
 w_e = w_m*p/2; %전기각속도
 f_m = w_m/(2*pi); %기계주파수
 f_e = w_e/(2*pi); %전기주파수
+
 n_theta_e = N_fft; %전기각 해상도
 theta_e = linspace(0, 2*pi,n_theta_e); %전기각
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,6 +54,7 @@ B_theta_e = resample(B_theta_e, N_fft, n_sample); %자기장의 데이터 N_fft(
 
 %전기각에 대한 입력전류
 I_amp = A_s*F_f*J/N_c*sqrt(2); %입력전류의 진폭
+
 I1_theta_e = I_amp*sin(theta_e);
 I2_theta_e = I_amp*sin(theta_e-(pi*2/3));
 I3_theta_e = I_amp*sin(theta_e-(pi*4/3));
